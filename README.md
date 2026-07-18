@@ -1,4 +1,4 @@
-# Cosmos Hub <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 16.5c-1.5 1.26-2.5 3.19-2.5 5.5s3 1 5.5-2.5c1.26-1.5 3.19-2.5 5.5-2.5s2.5 3 2.5 5.5-1 3-5.5 2.5c-2.31 0-4.24-1-5.5-2.5Z'/><path d='m12 12 9-9'/><path d='M16 8h5v5'/><path d='M9 15v-5H4'/></svg>" width="24" height="24" alt="Rocket Icon" />
+# Cosmos Hub <img src="https://unpkg.com/lucide-static@latest/icons/rocket.svg" width="24" height="24" style="filter: invert(1);" alt="White Rocket" />
 ## A universal Roblox exploit.
 
 ### About the exploit:
