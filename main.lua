@@ -207,16 +207,10 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local flyEnabled = false
-local flyConnection = nil
 local animConnection = nil
-
-local camX = 0
-local camY = 0
-local cameraDistance = 12
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -228,11 +222,8 @@ local function stopAnimations(humanoid)
 end
 
 local function cleanUpFly()
-    if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+    RunService:UnbindFromRenderStep("MobileFlyStep")
     if animConnection then animConnection:Disconnect(); animConnection = nil end
-    
-    camera.CameraType = Enum.CameraType.Custom
-    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
     
     local character = player.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
@@ -270,13 +261,8 @@ local function startFly(character)
     end
 
     local lockedPosition = rootPart.Position
-    local startLook = camera.CFrame.LookVector
-    camX = math.atan2(-startLook.X, -startLook.Z)
-    camY = math.asin(startLook.Y)
 
-    camera.CameraType = Enum.CameraType.Scriptable
-
-    flyConnection = RunService.RenderStepped:Connect(function(deltaTime)
+    RunService:BindToRenderStep("MobileFlyStep", Enum.RenderPriority.Camera.Value + 1, function(deltaTime)
         if not character or not character.Parent or not rootPart or not humanoid then
             cleanUpFly()
             return
@@ -284,26 +270,14 @@ local function startFly(character)
 
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
-        
-        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 
-        local mouseDelta = UserInputService:GetMouseDelta()
-        -- Uses default mouse sensitivity scaling
-        camX = camX - (mouseDelta.X * 0.003)
-        camY = math.clamp(camY - (mouseDelta.Y * 0.003), math.rad(-75), math.rad(75))
-
-        local camRotation = CFrame.Angles(0, camX, 0) * CFrame.Angles(camY, 0, 0)
-        
-        -- Pins the focus to the natural head level height
-        local headHeightOffset = Vector3.new(0, 1.5, 0)
-        local currentFocus = lockedPosition + headHeightOffset
-
+        local camCFrame = camera.CFrame
         local moveDirection = humanoid.MoveDirection
 
         if moveDirection.Magnitude > 0 then
             local speed = 50
             local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
-            local flightDirection = (camRotation.LookVector * -localMove.Z) + (camRotation.RightVector * localMove.X)
+            local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
             
             if flightDirection.Magnitude > 0 then
                 flightDirection = flightDirection.Unit
@@ -321,12 +295,11 @@ local function startFly(character)
             
             if not ray then
                 lockedPosition = targetPosition
-                currentFocus = lockedPosition + headHeightOffset
             end
         end
 
-        rootPart.CFrame = CFrame.new(lockedPosition) * camRotation
-        camera.CFrame = CFrame.new(currentFocus) * camRotation * CFrame.new(0, 0, cameraDistance)
+        local lookVector = camCFrame.LookVector
+        rootPart.CFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookVector.X, lookVector.Y, lookVector.Z))
     end)
 end
 
@@ -347,6 +320,7 @@ local Toggle = Player:CreateToggle({
 player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
 end)
+
 
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
