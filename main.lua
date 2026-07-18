@@ -76,10 +76,8 @@ end)
 local Button = Player:CreateButton({
    Name = "Reset Speed",
    Callback = function()
-       if SpeedPower then
+       if SpeedPower and SpeedPower.Set then
            SpeedPower:Set(16)
-       elseif Rayfield and Rayfield.Flags and Rayfield.Flags["Speed"] then
-           Rayfield.Flags["Speed"]:Set(16)
        end
    end,
 })
