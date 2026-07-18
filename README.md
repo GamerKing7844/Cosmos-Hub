@@ -1,2 +1,23 @@
-# Cosmos-Hub
-A universal Roblox exploit.
+# Cosmos Hub
+## A universal Roblox exploit.
+
+### About the exploit:
+
+Cosmos Hub is an exploit that uses Rayfield UI (by Sirius) to bring you awesome features like speed adjustment, jump power adjustment, flying, noclipping and more. We use a one-time key system (that can be found below) to ensure user validation.
+
+### How to use:
+
+Head over to the **main.lua** script in the repository and copy all of the code there. Then, paste the code into your Roblox executor (or save it as a new **.lua** file) and run it there.
+
+_(Since this exploit is brand new, a loadstring has not yet been created. Once we make one, you will see it here but in the meantime, feel free to make a loadstring yourself if you know what you're doing.)_
+
+### Key System:
+
+The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy the key below, and paste it into the exploit:
+
+TestKey
+
+
+
+
+_(PS: If I say "we" alot, I really mean "I" as this is a solo-project. "we" sounds more professional tho so, yeah. Thanks!)
