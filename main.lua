@@ -206,6 +206,118 @@ player.CharacterAdded:Connect(function(character)
     end
 end)
 
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local flyEnabled = false
+local flyConnection = nil
+local bodyVelocity = nil
+local bodyGyro = nil
+
+local function getMoveDirection()
+    local direction = Vector3.new(0, 0, 0)
+    local character = player.Character
+    if not character then return direction end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return direction end
+
+    local move = humanoid.MoveDirection
+    if move.Magnitude > 0 then
+        local camCFrame = camera.CFrame
+        local look = camCFrame.LookVector
+        local right = camCFrame.RightVector
+        
+        local localMove = character.HumanoidRootPart.CFrame:VectorToObjectSpace(move)
+        direction = (look * -localMove.Z) + (right * localMove.X)
+    end
+    return direction
+end
+
+local function cleanUpFly()
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    if bodyGyro then
+        bodyGyro:Destroy()
+        bodyGyro = nil
+    end
+    
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.PlatformStand = false
+            humanoid.AutoRotate = true
+        end
+    end
+end
+
+local function startFly(character)
+    cleanUpFly()
+    if not flyEnabled or not character then return end
+
+    local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    if not rootPart or not humanoid then return end
+
+    humanoid.PlatformStand = true
+    humanoid.AutoRotate = false
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = rootPart
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+    bodyGyro.CFrame = rootPart.CFrame
+    bodyGyro.Parent = rootPart
+
+    flyConnection = RunService.RenderStepped:Connect(function()
+        if not character or not character.Parent or not rootPart or not humanoid then
+            cleanUpFly()
+            return
+        end
+
+        local camLook = camera.CFrame.LookVector
+        bodyGyro.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(camLook.X, camLook.Y, camLook.Z))
+
+        local moveDir = getMoveDirection()
+        if moveDir.Magnitude > 0 then
+            bodyVelocity.Velocity = moveDir.Unit * 50
+        else
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        end
+    end)
+end
+
+local Toggle = Player:CreateToggle({
+   Name = "Fly",
+   CurrentValue = false,
+   Flag = "Fly",
+   Callback = function(Value)
+       flyEnabled = Value
+       if flyEnabled then
+           if player.Character then
+               startFly(player.Character)
+           end
+       else
+           cleanUpFly()
+       end
+   end,
+})
+
+player.CharacterAdded:Connect(function(character)
+    if flyEnabled then
+        startFly(character)
+    end
+end)
+
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
