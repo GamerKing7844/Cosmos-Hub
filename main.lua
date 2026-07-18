@@ -45,24 +45,34 @@ local Player = Window:CreateTab("Player", "user-2")
 
 local Section = Player:CreateSection("Power Adjustment")
 
+local player = game.Players.LocalPlayer
+local currentWalkSpeed = 16
+
 local Slider = Player:CreateSlider({
    Name = "Speed Power",
    Range = {0, 256},
    Increment = 1,
    Suffix = "studs per second",
    CurrentValue = 16,
-   Flag = "Speed", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Speed",
    Callback = function(Value)
-   local localPlayer = game.Players.LocalPlayer
-       
-       if localPlayer and localPlayer.Character then
-           local humanoid = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+       currentWalkSpeed = Value
+       if player and player.Character then
+           local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
            if humanoid then
                humanoid.WalkSpeed = Value
            end
        end
    end,
 })
+
+player.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    if humanoid then
+        humanoid.WalkSpeed = currentWalkSpeed
+    end
+end)
+
 
 local player = game.Players.LocalPlayer
 local currentJumpPower = 50
