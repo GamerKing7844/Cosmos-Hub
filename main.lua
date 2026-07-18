@@ -253,6 +253,9 @@ local function startFly(character)
     local animator = humanoid:WaitForChild("Animator", 5)
     if not rootPart or not humanoid then return end
 
+    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+    task.wait(0.05)
+
     humanoid.PlatformStand = true
     humanoid.AutoRotate = false
     stopAnimations(humanoid)
