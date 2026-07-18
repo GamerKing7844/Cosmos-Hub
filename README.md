@@ -10,10 +10,9 @@ Cosmos Hub is an exploit that uses Rayfield UI (by Sirius) to bring you awesome 
 
 Simply copy the loadstring below, paste it into your executor of choice and run the code:
 
-**loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerKing7844/Cosmos-Hub/refs/heads/main/main.lua"))()**
-
-```markdown
-[![Copy Script](https://img.shields.io/badge/Get_Script_Here-blue?style=for-the-badge&logo=roblox)](https://raw.githubusercontent.com/GamerKing7844/Cosmos-Hub/main/loadstring.lua)
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerKing7844/Cosmos-Hub/refs/heads/main/main.lua"))()
+```
 
 ### Key System:
 
