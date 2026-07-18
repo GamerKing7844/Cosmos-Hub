@@ -212,7 +212,6 @@ local camera = workspace.CurrentCamera
 local flyEnabled = false
 local flyConnection = nil
 local animConnection = nil
-local antiGravityForce = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -226,19 +225,18 @@ end
 local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
-    if antiGravityForce then antiGravityForce:Destroy(); antiGravityForce = nil end
     
     local character = player.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        local rootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoid then
-            humanoid.PlatformStand = false
-        end
-        if rootPart then
-            rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-        end
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    
+    if rootPart then
+        rootPart.Anchored = false
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    end
+    if humanoid then
+        humanoid.PlatformStand = false
     end
 end
 
@@ -252,6 +250,7 @@ local function startFly(character)
     if not rootPart or not humanoid then return end
 
     humanoid.PlatformStand = true
+    rootPart.Anchored = true
     stopAnimations(humanoid)
 
     if animator then
@@ -259,11 +258,6 @@ local function startFly(character)
             track:Stop(0)
         end)
     end
-
-    antiGravityForce = Instance.new("BodyForce")
-    antiGravityForce.Name = "FlyAntiGravity"
-    antiGravityForce.Force = Vector3.new(0, 0, 0)
-    antiGravityForce.Parent = rootPart
 
     local lockedPosition = rootPart.Position
 
@@ -275,17 +269,6 @@ local function startFly(character)
 
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
-        
-        local totalMass = 0
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                totalMass = totalMass + part:GetMass()
-            end
-        end
-        antiGravityForce.Force = Vector3.new(0, totalMass * workspace.Gravity, 0)
-
-        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 
         local camCFrame = camera.CFrame
         local moveDirection = humanoid.MoveDirection
@@ -299,13 +282,16 @@ local function startFly(character)
                 flightDirection = flightDirection.Unit
             end
             
-            local targetPosition = rootPart.Position + (flightDirection * speed * deltaTime)
+            local targetPosition = lockedPosition + (flightDirection * speed * deltaTime)
             
             local raycastParams = RaycastParams.new()
             raycastParams.FilterDescendantsInstances = {character}
             raycastParams.FilterType = Enum.RaycastFilterType.Exclude
             
-            local ray = workspace:Raycast(rootPart.Position, flightDirection * 2, raycastParams)
+            rootPart.Anchored = false
+            local ray = workspace:Raycast(lockedPosition, flightDirection * 2, raycastParams)
+            rootPart.Anchored = true
+            
             if not ray then
                 lockedPosition = targetPosition
             end
