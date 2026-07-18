@@ -210,7 +210,10 @@ local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local flyEnabled = false
+local flyConnection = nil
 local animConnection = nil
+local bv = nil
+local bg = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -222,15 +225,16 @@ local function stopAnimations(humanoid)
 end
 
 local function cleanUpFly()
-    RunService:UnbindFromRenderStep("MobileFlyStep")
+    if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
+    if bv then bv:Destroy(); bv = nil end
+    if bg then bg:Destroy(); bg = nil end
     
     local character = player.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
     
     if rootPart then
-        rootPart.Anchored = false
         rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
         rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
     end
@@ -251,7 +255,6 @@ local function startFly(character)
 
     humanoid.PlatformStand = true
     humanoid.AutoRotate = false
-    rootPart.Anchored = true
     stopAnimations(humanoid)
 
     if animator then
@@ -260,9 +263,19 @@ local function startFly(character)
         end)
     end
 
-    local lockedPosition = rootPart.Position
+    bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(100000, 100000, 100000)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.Parent = rootPart
 
-    RunService:BindToRenderStep("MobileFlyStep", Enum.RenderPriority.Camera.Value + 1, function(deltaTime)
+    bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(100000, 100000, 100000)
+    bg.P = 9000
+    bg.D = 500
+    bg.CFrame = rootPart.CFrame
+    bg.Parent = rootPart
+
+    flyConnection = RunService.RenderStepped:Connect(function()
         if not character or not character.Parent or not rootPart or not humanoid then
             cleanUpFly()
             return
@@ -274,32 +287,21 @@ local function startFly(character)
         local camCFrame = camera.CFrame
         local moveDirection = humanoid.MoveDirection
 
+        bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camCFrame.LookVector)
+
         if moveDirection.Magnitude > 0 then
             local speed = 50
             local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
             local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
             
             if flightDirection.Magnitude > 0 then
-                flightDirection = flightDirection.Unit
+                bv.Velocity = flightDirection.Unit * speed
+            else
+                bv.Velocity = Vector3.new(0, 0, 0)
             end
-            
-            local targetPosition = lockedPosition + (flightDirection * speed * deltaTime)
-            
-            local raycastParams = RaycastParams.new()
-            raycastParams.FilterDescendantsInstances = {character}
-            raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-            
-            rootPart.Anchored = false
-            local ray = workspace:Raycast(lockedPosition, flightDirection * 2, raycastParams)
-            rootPart.Anchored = true
-            
-            if not ray then
-                lockedPosition = targetPosition
-            end
+        else
+            bv.Velocity = Vector3.new(0, 0, 0)
         end
-
-        local lookVector = camCFrame.LookVector
-        rootPart.CFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookVector.X, lookVector.Y, lookVector.Z))
     end)
 end
 
@@ -320,7 +322,6 @@ local Toggle = Player:CreateToggle({
 player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
 end)
-
 
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
