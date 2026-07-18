@@ -73,6 +73,14 @@ player.CharacterAdded:Connect(function(character)
     end
 end)
 
+local Button = Player:CreateButton({
+   Name = "Reset Speed",
+   Callback = function()
+       if SpeedPower then
+           SpeedPower:Set(16)
+       end
+   end,
+})
 
 local player = game.Players.LocalPlayer
 local currentJumpPower = 50
