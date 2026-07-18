@@ -330,12 +330,27 @@ local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 local noclipEnabled = false
 local noclipConnection = nil
+local lastFloorPart = nil
 
 local function cleanUpNoclip()
     if noclipConnection then
         noclipConnection:Disconnect()
         noclipConnection = nil
     end
+    
+    local character = player.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+    
+    if lastFloorPart and lastFloorPart.Parent then
+        lastFloorPart.CanCollide = true
+    end
+    lastFloorPart = nil
 end
 
 local function startNoclip(character)
@@ -358,6 +373,10 @@ local function startNoclip(character)
         local floorRay = workspace:Raycast(rootPart.Position, Vector3.new(0, -5, 0), raycastParams)
         local floorPart = floorRay and floorRay.Instance
 
+        if lastFloorPart and lastFloorPart ~= floorPart and lastFloorPart.Parent then
+            lastFloorPart.CanCollide = true
+        end
+
         for _, part in ipairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -366,6 +385,7 @@ local function startNoclip(character)
 
         if floorPart and floorPart:IsA("BasePart") then
             floorPart.CanCollide = true
+            lastFloorPart = floorPart
         end
     end)
 end
