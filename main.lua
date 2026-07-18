@@ -83,3 +83,30 @@ end
 
    end,
 })
+
+local Section = Player:CreateSection("Health Adjustment")
+
+local Input = Tab:CreateInput({
+   Name = "Health Adjustment",
+   CurrentValue = "100",
+   PlaceholderText = "50",
+   RemoveTextAfterFocusLost = false,
+   Flag = "Health",
+   Callback = function(Text)
+   local targetHealth = tonumber(Text) -- Replace 'Text' with your input variable if needed
+
+if targetHealth then
+    local player = game.Players.LocalPlayer
+    if player and player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if targetHealth > humanoid.MaxHealth then
+                humanoid.MaxHealth = targetHealth
+            end
+            humanoid.Health = targetHealth
+        end
+    end
+end
+
+   end,
+})
