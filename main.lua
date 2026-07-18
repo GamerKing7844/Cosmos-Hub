@@ -41,7 +41,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Player", "user-2")
+local Player = Window:CreateTab("Player", "user-2")
 
 local Section = Player:CreateSection("Power Adjustment")
 
