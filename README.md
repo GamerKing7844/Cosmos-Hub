@@ -12,6 +12,9 @@ Simply copy the loadstring below, paste it into your executor of choice and run 
 
 **loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerKing7844/Cosmos-Hub/refs/heads/main/main.lua"))()**
 
+```markdown
+[![Copy Script](https://img.shields.io/badge/Get_Script_Here-blue?style=for-the-badge&logo=roblox)](https://raw.githubusercontent.com/GamerKing7844/Cosmos-Hub/main/loadstring.lua)
+
 ### Key System:
 
 The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy the key below, and paste it into the exploit:
