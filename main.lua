@@ -86,7 +86,7 @@ end
 
 local Section = Player:CreateSection("Health Adjustment")
 
-local Input = Tab:CreateInput({
+local Input = Player:CreateInput({
    Name = "Health Adjustment",
    CurrentValue = "100",
    PlaceholderText = "50",
