@@ -78,6 +78,8 @@ local Button = Player:CreateButton({
    Callback = function()
        if SpeedPower then
            SpeedPower:Set(16)
+       elseif Rayfield and Rayfield.Flags and Rayfield.Flags["SpeedPower"] then
+           Rayfield.Flags["SpeedPower"]:Set(16)
        end
    end,
 })
