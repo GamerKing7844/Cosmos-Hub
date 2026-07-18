@@ -16,6 +16,10 @@ _(Since this exploit is brand new, a loadstring has not yet been created. Once w
 The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy the key below, and paste it into the exploit:
 
 TestKey
+
+
+
+
 ‎‎ 
 ‎ 
 ‎ 
