@@ -218,7 +218,6 @@ local Button = Player:CreateButton({
            
            if humanoid and humanoid.Health > 0 and rootPart then
                humanoid.PlatformStand = true
-               -- Give a tiny tilt and a small push so you fall over flat instead of clipping
                rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(10), 0, 0)
                rootPart.AssemblyLinearVelocity = rootPart.CFrame.LookVector * 5
            end
@@ -235,3 +234,24 @@ UserInputService.JumpRequest:Connect(function()
         end
     end
 end)
+
+local player = game.Players.LocalPlayer
+
+local Button = Player:CreateButton({
+   Name = "Fling",
+   Callback = function()
+       if player.Character then
+           local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+           if rootPart then
+               local flingForce = Instance.new("BodyVelocity")
+               flingForce.Name = "FlingForce"
+               flingForce.Velocity = (rootPart.CFrame.LookVector * 300) + Vector3.new(0, 150, 0)
+               flingForce.MaxForce = Vector3.new(500000, 500000, 500000)
+               flingForce.Parent = rootPart
+               
+               task.wait(0.1)
+               flingForce:Destroy()
+           end
+       end
+   end,
+})
