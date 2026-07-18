@@ -214,8 +214,13 @@ local Button = Player:CreateButton({
    Callback = function()
        if player.Character then
            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-           if humanoid and humanoid.Health > 0 then
+           local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+           
+           if humanoid and humanoid.Health > 0 and rootPart then
                humanoid.PlatformStand = true
+               -- Give a tiny tilt and a small push so you fall over flat instead of clipping
+               rootPart.CFrame = rootPart.CFrame * CFrame.Angles(math.rad(10), 0, 0)
+               rootPart.AssemblyLinearVelocity = rootPart.CFrame.LookVector * 5
            end
        end
    end,
