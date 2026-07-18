@@ -207,6 +207,7 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 local Button = Player:CreateButton({
    Name = "Ragdoll",
@@ -214,8 +215,18 @@ local Button = Player:CreateButton({
        if player.Character then
            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
            if humanoid and humanoid.Health > 0 then
-               humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
+               humanoid.PlatformStand = true
            end
        end
    end,
 })
+
+UserInputService.JumpRequest:Connect(function()
+    if player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.PlatformStand then
+            humanoid.PlatformStand = false
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
+end)
