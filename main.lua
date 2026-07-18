@@ -213,7 +213,7 @@ local flyEnabled = false
 local flyConnection = nil
 local bodyVelocity = nil
 local bodyGyro = nil
-local currentAnims = {}
+local animConnection = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -224,42 +224,11 @@ local function stopAnimations(humanoid)
     end
 end
 
-local function getMoveDirection()
-    local direction = Vector3.new(0, 0, 0)
-    local character = player.Character
-    if not character then return direction end
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return direction end
-
-    local move = humanoid.MoveDirection
-    if move.Magnitude > 0 then
-        local camCFrame = camera.CFrame
-        local look = camCFrame.LookVector
-        local right = camCFrame.RightVector
-        
-        local localMove = character.HumanoidRootPart.CFrame:VectorToObjectSpace(move)
-        direction = (look * -localMove.Z) + (right * localMove.X)
-    end
-    return direction
-end
-
 local function cleanUpFly()
-    if flyConnection then
-        flyConnection:Disconnect()
-        flyConnection = nil
-    end
-    if bodyVelocity then
-        bodyVelocity:Destroy()
-        bodyVelocity = nil
-    end
-    if bodyGyro then
-        bodyGyro:Destroy()
-        bodyGyro = nil
-    end
-    for _, conn in ipairs(currentAnims) do
-        if conn then conn:Disconnect() end
-    end
-    currentAnims = {}
+    if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
+    if animConnection then animConnection:Disconnect(); animConnection = nil end
+    if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end
+    if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end
     
     local character = player.Character
     if character then
@@ -277,28 +246,28 @@ local function startFly(character)
 
     local rootPart = character:WaitForChild("HumanoidRootPart", 5)
     local humanoid = character:WaitForChild("Humanoid", 5)
+    local animator = humanoid:WaitForChild("Animator", 5)
     if not rootPart or not humanoid then return end
 
     humanoid.PlatformStand = true
     humanoid.AutoRotate = false
     stopAnimations(humanoid)
 
-    local animator = humanoid:WaitForChild("Animator", 5)
     if animator then
-        table.insert(currentAnims, animator.AnimationPlayed:Connect(function(track)
+        animConnection = animator.AnimationPlayed:Connect(function(track)
             track:Stop(0)
-        end))
+        end)
     end
 
     bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+    bodyVelocity.MaxForce = Vector3.new(1, 1, 1) * 400000
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.Parent = rootPart
 
     bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-    bodyGyro.D = 0
-    bodyGyro.P = 500000
+    bodyGyro.MaxTorque = Vector3.new(1, 1, 1) * 400000
+    bodyGyro.P = 3000
+    bodyGyro.D = 500
     bodyGyro.CFrame = rootPart.CFrame
     bodyGyro.Parent = rootPart
 
@@ -311,17 +280,19 @@ local function startFly(character)
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
 
-        local camLook = camera.CFrame.LookVector
-        bodyGyro.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(camLook.X, camLook.Y, camLook.Z))
+        local camCFrame = camera.CFrame
+        bodyGyro.CFrame = camCFrame
 
-        local moveDir = getMoveDirection()
-        if moveDir.Magnitude > 0 then
-            local velocityRay = raycastParams and workspace:Raycast(rootPart.Position, moveDir.Unit * 3, raycastParams)
-            if not velocityRay then
-                bodyVelocity.Velocity = moveDir.Unit * 50
-            else
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            end
+        local moveDirection = humanoid.MoveDirection
+        if moveDirection.Magnitude > 0 then
+            local _, _, _, m00, m01, m02, _, _, m12, _, _, m22 = camCFrame:Components()
+            local lookVector = Vector3.new(m02, m12, m22)
+            local rightVector = Vector3.new(m00, m01, m02)
+            
+            local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
+            local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
+            
+            bodyVelocity.Velocity = flightDirection.Unit * 50
         else
             bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         end
@@ -335,9 +306,7 @@ local Toggle = Player:CreateToggle({
    Callback = function(Value)
        flyEnabled = Value
        if flyEnabled then
-           if player.Character then
-               startFly(player.Character)
-           end
+           if player.Character then startFly(player.Character) end
        else
            cleanUpFly()
        end
@@ -345,9 +314,7 @@ local Toggle = Player:CreateToggle({
 })
 
 player.CharacterAdded:Connect(function(character)
-    if flyEnabled then
-        startFly(character)
-    end
+    if flyEnabled then startFly(character) end
 end)
 
 local player = game.Players.LocalPlayer
