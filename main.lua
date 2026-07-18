@@ -207,11 +207,17 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
+
 local flyEnabled = false
 local flyConnection = nil
 local animConnection = nil
+
+local cameraX = 0
+local cameraY = 0
+local cameraDistance = 12
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -225,6 +231,9 @@ end
 local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
+    
+    camera.CameraType = Enum.CameraType.Custom
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
     
     local character = player.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
@@ -260,6 +269,12 @@ local function startFly(character)
     end
 
     local lockedPosition = rootPart.Position
+    
+    local startLook = camera.CFrame.LookVector
+    cameraX = math.atan2(-startLook.X, -startLook.Z)
+    cameraY = math.asin(startLook.Y)
+
+    camera.CameraType = Enum.CameraType.Scriptable
 
     flyConnection = RunService.RenderStepped:Connect(function(deltaTime)
         if not character or not character.Parent or not rootPart or not humanoid then
@@ -269,14 +284,22 @@ local function startFly(character)
 
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
+        
+        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 
-        local camCFrame = camera.CFrame
+        local mouseDelta = UserInputService:GetMouseDelta()
+        cameraX = cameraX - (mouseDelta.X * 0.004)
+        cameraY = math.clamp(cameraY - (mouseDelta.Y * 0.004), math.rad(-80), math.rad(80))
+
+        local camRotation = CFrame.Angles(0, cameraX, 0) * CFrame.Angles(cameraY, 0, 0)
+        local camCFrame = CFrame.new(lockedPosition) * camRotation * CFrame.new(0, 0, cameraDistance)
+
         local moveDirection = humanoid.MoveDirection
 
         if moveDirection.Magnitude > 0 then
             local speed = 50
             local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
-            local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
+            local flightDirection = (camRotation.LookVector * -localMove.Z) + (camRotation.RightVector * localMove.X)
             
             if flightDirection.Magnitude > 0 then
                 flightDirection = flightDirection.Unit
@@ -297,7 +320,8 @@ local function startFly(character)
             end
         end
 
-        rootPart.CFrame = CFrame.new(lockedPosition) * camCFrame.Rotation
+        rootPart.CFrame = CFrame.new(lockedPosition) * camRotation
+        camera.CFrame = CFrame.new(lockedPosition) * camRotation * CFrame.new(0, 2, cameraDistance)
     end)
 end
 
