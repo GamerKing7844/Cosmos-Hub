@@ -135,3 +135,27 @@ player.CharacterAdded:Connect(function()
     task.wait(0.5) 
     Input:Set("100")
 end)
+
+local Section = Player:CreateSection("Fun Stuff")
+
+local UserInputService = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+local infiniteJumpEnabled = false
+
+local Toggle = Player:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Flag = "InfJump",
+   Callback = function(Value)
+       infiniteJumpEnabled = Value
+   end,
+})
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJumpEnabled and player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
