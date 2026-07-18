@@ -207,12 +207,12 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local flyEnabled = false
 local flyConnection = nil
 local animConnection = nil
-local cameraTargetPart = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -227,8 +227,7 @@ local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
     
-    camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if cameraTargetPart then cameraTargetPart:Destroy(); cameraTargetPart = nil end
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
     
     local character = player.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
@@ -265,16 +264,6 @@ local function startFly(character)
         end)
     end
 
-    cameraTargetPart = Instance.new("Part")
-    cameraTargetPart.Name = "FlyCameraTarget"
-    cameraTargetPart.Transparency = 1
-    cameraTargetPart.Size = Vector3.new(1, 1, 1)
-    cameraTargetPart.CanCollide = false
-    cameraTargetPart.Anchored = true
-    cameraTargetPart.CFrame = rootPart.CFrame
-    cameraTargetPart.Parent = workspace
-    camera.CameraSubject = cameraTargetPart
-
     local lockedPosition = rootPart.Position
 
     flyConnection = RunService.RenderStepped:Connect(function(deltaTime)
@@ -285,6 +274,8 @@ local function startFly(character)
 
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
+        
+        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 
         local camCFrame = camera.CFrame
         local moveDirection = humanoid.MoveDirection
@@ -314,10 +305,7 @@ local function startFly(character)
         end
 
         local lookPart = camCFrame.LookVector
-        local finalCFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookPart.X, lookPart.Y, lookPart.Z))
-        
-        rootPart.CFrame = finalCFrame
-        cameraTargetPart.CFrame = finalCFrame
+        rootPart.CFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookPart.X, lookPart.Y, lookPart.Z))
     end)
 end
 
@@ -338,6 +326,7 @@ local Toggle = Player:CreateToggle({
 player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
 end)
+
 
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
