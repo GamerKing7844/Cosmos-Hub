@@ -43,7 +43,7 @@ local Window = Rayfield:CreateWindow({
 
 local Tab = Window:CreateTab("Player", "user-2")
 
-local Section = Player:CreateSection("Power")
+local Section = Player:CreateSection("Power Adjustment")
 
 local Slider = Player:CreateSlider({
    Name = "Speed Power",
