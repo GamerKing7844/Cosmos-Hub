@@ -326,6 +326,68 @@ player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
 end)
 
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local noclipEnabled = false
+local noclipConnection = nil
+
+local function cleanUpNoclip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+end
+
+local function startNoclip(character)
+    cleanUpNoclip()
+    if not noclipEnabled or not character then return end
+
+    local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+    if not rootPart then return end
+
+    noclipConnection = RunService.Stepped:Connect(function()
+        if not character or not character.Parent or not rootPart then
+            cleanUpNoclip()
+            return
+        end
+
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {character}
+        raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+        local floorRay = workspace:Raycast(rootPart.Position, Vector3.new(0, -5, 0), raycastParams)
+        local floorPart = floorRay and floorRay.Instance
+
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+
+        if floorPart and floorPart:IsA("BasePart") then
+            floorPart.CanCollide = true
+        end
+    end)
+end
+
+local Toggle = Player:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Flag = "Noclip",
+   Callback = function(Value)
+       noclipEnabled = Value
+       if noclipEnabled then
+           if player.Character then startNoclip(player.Character) end
+       else
+           cleanUpNoclip()
+       end
+   end,
+})
+
+player.CharacterAdded:Connect(function(character)
+    if noclipEnabled then startNoclip(character) end
+end)
+
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
