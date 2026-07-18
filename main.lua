@@ -212,6 +212,7 @@ local camera = workspace.CurrentCamera
 local flyEnabled = false
 local flyConnection = nil
 local animConnection = nil
+local antiGravityForce = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -225,6 +226,7 @@ end
 local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
+    if antiGravityForce then antiGravityForce:Destroy(); antiGravityForce = nil end
     
     local character = player.Character
     if character then
@@ -258,6 +260,13 @@ local function startFly(character)
         end)
     end
 
+    antiGravityForce = Instance.new("BodyForce")
+    antiGravityForce.Name = "FlyAntiGravity"
+    antiGravityForce.Force = Vector3.new(0, 0, 0)
+    antiGravityForce.Parent = rootPart
+
+    local lockedPosition = rootPart.Position
+
     flyConnection = RunService.RenderStepped:Connect(function(deltaTime)
         if not character or not character.Parent or not rootPart or not humanoid then
             cleanUpFly()
@@ -267,12 +276,19 @@ local function startFly(character)
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
         
+        local totalMass = 0
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                totalMass = totalMass + part:GetMass()
+            end
+        end
+        antiGravityForce.Force = Vector3.new(0, totalMass * workspace.Gravity, 0)
+
         rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
         rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 
         local camCFrame = camera.CFrame
         local moveDirection = humanoid.MoveDirection
-        local targetCFrame = CFrame.new(rootPart.Position) * camCFrame.Rotation
 
         if moveDirection.Magnitude > 0 then
             local speed = 50
@@ -291,11 +307,11 @@ local function startFly(character)
             
             local ray = workspace:Raycast(rootPart.Position, flightDirection * 2, raycastParams)
             if not ray then
-                targetCFrame = CFrame.new(targetPosition) * camCFrame.Rotation
+                lockedPosition = targetPosition
             end
         end
 
-        rootPart.CFrame = targetCFrame
+        rootPart.CFrame = CFrame.new(lockedPosition) * camCFrame.Rotation
     end)
 end
 
@@ -311,7 +327,7 @@ local Toggle = Player:CreateToggle({
            cleanUpFly()
        end
    end,
- })
+})
 
 player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
