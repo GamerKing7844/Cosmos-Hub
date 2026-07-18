@@ -1,4 +1,4 @@
-# Cosmos Hub <img src="https://unpkg.com/lucide-static@latest/icons/rocket.svg" width="24" height="24" style="filter: invert(1);" alt="White Rocket" />
+# Cosmos Hub <img src="./icon.svg" width="24" height="24" alt="Rocket" />
 ## A universal Roblox exploit.
 
 ### About the exploit:
