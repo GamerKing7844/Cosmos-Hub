@@ -1,4 +1,5 @@
 # Cosmos Hub <img align="right" src="./icon.svg?v=1" width="32" height="32" alt="Rocket" />
+
 ## A universal Roblox exploit.
 
 ### About the exploit:
