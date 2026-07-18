@@ -1,9 +1,10 @@
-<p align="justify">
-  <font size="6"><b>Cosmos Hub</b></font>
-  <img src="./icon.svg?v=1" width="24" height="24" alt="Rocket" style="float: right;" />
-</p>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h1>Cosmos Hub</h1>
+  <img src="./icon.svg?v=1" width="32" height="32" alt="Rocket" />
+</div>
 
 <h2>A universal Roblox exploit.</h2>
+
 
 ### About the exploit:
 
