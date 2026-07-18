@@ -211,8 +211,6 @@ local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local flyEnabled = false
 local flyConnection = nil
-local bodyVelocity = nil
-local bodyGyro = nil
 local animConnection = nil
 
 local function stopAnimations(humanoid)
@@ -227,15 +225,17 @@ end
 local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
-    if bodyVelocity then bodyVelocity:Destroy(); bodyVelocity = nil end
-    if bodyGyro then bodyGyro:Destroy(); bodyGyro = nil end
     
     local character = player.Character
     if character then
         local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
         if humanoid then
             humanoid.PlatformStand = false
-            humanoid.AutoRotate = true
+        end
+        if rootPart then
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
         end
     end
 end
@@ -250,7 +250,6 @@ local function startFly(character)
     if not rootPart or not humanoid then return end
 
     humanoid.PlatformStand = true
-    humanoid.AutoRotate = false
     stopAnimations(humanoid)
 
     if animator then
@@ -259,19 +258,7 @@ local function startFly(character)
         end)
     end
 
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(1, 1, 1) * 400000
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = rootPart
-
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.MaxTorque = Vector3.new(1, 1, 1) * 400000
-    bodyGyro.P = 3000
-    bodyGyro.D = 500
-    bodyGyro.CFrame = rootPart.CFrame
-    bodyGyro.Parent = rootPart
-
-    flyConnection = RunService.RenderStepped:Connect(function()
+    flyConnection = RunService.RenderStepped:Connect(function(deltaTime)
         if not character or not character.Parent or not rootPart or not humanoid then
             cleanUpFly()
             return
@@ -279,23 +266,36 @@ local function startFly(character)
 
         humanoid.PlatformStand = true
         stopAnimations(humanoid)
+        
+        rootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        rootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 
         local camCFrame = camera.CFrame
-        bodyGyro.CFrame = camCFrame
-
         local moveDirection = humanoid.MoveDirection
+        local targetCFrame = CFrame.new(rootPart.Position) * camCFrame.Rotation
+
         if moveDirection.Magnitude > 0 then
-            local _, _, _, m00, m01, m02, _, _, m12, _, _, m22 = camCFrame:Components()
-            local lookVector = Vector3.new(m02, m12, m22)
-            local rightVector = Vector3.new(m00, m01, m02)
-            
+            local speed = 50
             local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
             local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
             
-            bodyVelocity.Velocity = flightDirection.Unit * 50
-        else
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            if flightDirection.Magnitude > 0 then
+                flightDirection = flightDirection.Unit
+            end
+            
+            local targetPosition = rootPart.Position + (flightDirection * speed * deltaTime)
+            
+            local raycastParams = RaycastParams.new()
+            raycastParams.FilterDescendantsInstances = {character}
+            raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+            
+            local ray = workspace:Raycast(rootPart.Position, flightDirection * 2, raycastParams)
+            if not ray then
+                targetCFrame = CFrame.new(targetPosition) * camCFrame.Rotation
+            end
         end
+
+        rootPart.CFrame = targetCFrame
     end)
 end
 
@@ -311,7 +311,7 @@ local Toggle = Player:CreateToggle({
            cleanUpFly()
        end
    end,
-})
+ })
 
 player.CharacterAdded:Connect(function(character)
     if flyEnabled then startFly(character) end
