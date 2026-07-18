@@ -214,8 +214,7 @@ local Button = Player:CreateButton({
        if player.Character then
            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
            if humanoid and humanoid.Health > 0 then
-               humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-               humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+               humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
            end
        end
    end,
