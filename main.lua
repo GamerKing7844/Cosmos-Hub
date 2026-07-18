@@ -4,7 +4,7 @@ Rayfield:LoadConfiguration()
 
 local Window = Rayfield:CreateWindow({
    Name = "Cosmos Hub",
-   Icon = 98829628316355, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   Icon = 4863337105, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "Cosmos Hub",
    LoadingSubtitle = "by GamerKing7844 (Nathan F)",
    ShowText = "Cosmos Hub", -- for mobile users to unhide Rayfield, change if you'd like
