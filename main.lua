@@ -213,6 +213,16 @@ local flyEnabled = false
 local flyConnection = nil
 local bodyVelocity = nil
 local bodyGyro = nil
+local currentAnims = {}
+
+local function stopAnimations(humanoid)
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if animator then
+        for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+        end
+    end
+end
 
 local function getMoveDirection()
     local direction = Vector3.new(0, 0, 0)
@@ -246,6 +256,10 @@ local function cleanUpFly()
         bodyGyro:Destroy()
         bodyGyro = nil
     end
+    for _, conn in ipairs(currentAnims) do
+        if conn then conn:Disconnect() end
+    end
+    currentAnims = {}
     
     local character = player.Character
     if character then
@@ -267,6 +281,14 @@ local function startFly(character)
 
     humanoid.PlatformStand = true
     humanoid.AutoRotate = false
+    stopAnimations(humanoid)
+
+    local animator = humanoid:WaitForChild("Animator", 5)
+    if animator then
+        table.insert(currentAnims, animator.AnimationPlayed:Connect(function(track)
+            track:Stop(0)
+        end))
+    end
 
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
@@ -275,6 +297,8 @@ local function startFly(character)
 
     bodyGyro = Instance.new("BodyGyro")
     bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+    bodyGyro.D = 0
+    bodyGyro.P = 500000
     bodyGyro.CFrame = rootPart.CFrame
     bodyGyro.Parent = rootPart
 
@@ -284,12 +308,20 @@ local function startFly(character)
             return
         end
 
+        humanoid.PlatformStand = true
+        stopAnimations(humanoid)
+
         local camLook = camera.CFrame.LookVector
         bodyGyro.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(camLook.X, camLook.Y, camLook.Z))
 
         local moveDir = getMoveDirection()
         if moveDir.Magnitude > 0 then
-            bodyVelocity.Velocity = moveDir.Unit * 50
+            local velocityRay = raycastParams and workspace:Raycast(rootPart.Position, moveDir.Unit * 3, raycastParams)
+            if not velocityRay then
+                bodyVelocity.Velocity = moveDir.Unit * 50
+            else
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            end
         else
             bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         end
