@@ -205,3 +205,18 @@ player.CharacterAdded:Connect(function(character)
         updateFloat(character)
     end
 end)
+
+local player = game.Players.LocalPlayer
+
+local Button = Player:CreateButton({
+   Name = "Ragdoll",
+   Callback = function()
+       if player.Character then
+           local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+           if humanoid and humanoid.Health > 0 then
+               humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+               humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+           end
+       end
+   end,
+})
