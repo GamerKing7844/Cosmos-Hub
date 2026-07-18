@@ -48,7 +48,7 @@ local Section = Player:CreateSection("Power Adjustment")
 local player = game.Players.LocalPlayer
 local currentWalkSpeed = 16
 
-local Slider = Player:CreateSlider({
+local SpeedPower = Player:CreateSlider({
    Name = "Speed Power",
    Range = {0, 256},
    Increment = 1,
