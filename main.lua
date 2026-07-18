@@ -64,32 +64,42 @@ local Slider = Player:CreateSlider({
    end,
 })
 
+local player = game.Players.LocalPlayer
+local currentJumpPower = 50
+
 local Slider = Player:CreateSlider({
    Name = "Jump Power",
    Range = {0, 250},
    Increment = 1,
    Suffix = "studs per second",
    CurrentValue = 50,
-   Flag = "Jump", -- A flag is the identifier for the configuration file; make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Jump",
    Callback = function(Value)
-   local LocalPlayer = game.Players.LocalPlayer
-if LocalPlayer and LocalPlayer.Character then
-    local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if Humanoid then
-        Humanoid.UseJumpPower = true 
-        Humanoid.JumpPower = Value
-    end
-end
-
+       currentJumpPower = Value
+       if player and player.Character then
+           local Humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+           if Humanoid then
+               Humanoid.UseJumpPower = true 
+               Humanoid.JumpPower = Value
+           end
+       end
    end,
 })
+
+player.CharacterAdded:Connect(function(character)
+    local Humanoid = character:WaitForChild("Humanoid", 5)
+    if Humanoid then
+        Humanoid.UseJumpPower = true 
+        Humanoid.JumpPower = currentJumpPower
+    end
+end)
 
 local Section = Player:CreateSection("Health Adjustment")
 
 local player = game.Players.LocalPlayer
 
 local Input = Player:CreateInput({
-   Name = "Health Adjustment",
+   Name = "Health",
    CurrentValue = "100",
    PlaceholderText = "50",
    RemoveTextAfterFocusLost = false,
