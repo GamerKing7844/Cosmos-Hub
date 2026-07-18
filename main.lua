@@ -159,3 +159,49 @@ UserInputService.JumpRequest:Connect(function()
         end
     end
 end)
+
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local floatEnabled = false
+local currentFloatForce = nil
+
+local function updateFloat(character)
+    if not character then return end
+    
+    if floatEnabled then
+        local rootPart = character:WaitForChild("HumanoidRootPart", 5)
+        if rootPart and not rootPart:FindFirstChild("FloatForce") then
+            currentFloatForce = Instance.new("BodyVelocity")
+            currentFloatForce.Name = "FloatForce"
+            currentFloatForce.Velocity = Vector3.new(0, 20, 0)
+            currentFloatForce.MaxForce = Vector3.new(0, 400000, 0)
+            currentFloatForce.Parent = rootPart
+        end
+    else
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            local force = rootPart:FindFirstChild("FloatForce")
+            if force then force:Destroy() end
+        end
+        currentFloatForce = nil
+    end
+end
+
+local Toggle = Player:CreateToggle({
+   Name = "Float",
+   CurrentValue = false,
+   Flag = "Float",
+   Callback = function(Value)
+       floatEnabled = Value
+       if player.Character then
+           updateFloat(player.Character)
+       end
+   end,
+})
+
+player.CharacterAdded:Connect(function(character)
+    task.wait(0.1)
+    if floatEnabled then
+        updateFloat(character)
+    end
+end)
