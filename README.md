@@ -17,6 +17,6 @@ The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy
 
 TestKey
 
---
+---
 
 _(PS: If I say "we" alot, I really mean "I" as this is a solo-project. "we" sounds more professional tho so, yeah. Thanks!)_
