@@ -212,6 +212,7 @@ local camera = workspace.CurrentCamera
 local flyEnabled = false
 local flyConnection = nil
 local animConnection = nil
+local cameraTargetPart = nil
 
 local function stopAnimations(humanoid)
     local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -226,6 +227,9 @@ local function cleanUpFly()
     if flyConnection then flyConnection:Disconnect(); flyConnection = nil end
     if animConnection then animConnection:Disconnect(); animConnection = nil end
     
+    camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    if cameraTargetPart then cameraTargetPart:Destroy(); cameraTargetPart = nil end
+    
     local character = player.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -238,7 +242,6 @@ local function cleanUpFly()
     if humanoid then
         humanoid.PlatformStand = false
         humanoid.AutoRotate = true
-        humanoid.CameraOffset = Vector3.new(0, 0, 0)
     end
 end
 
@@ -254,9 +257,6 @@ local function startFly(character)
     humanoid.PlatformStand = true
     humanoid.AutoRotate = false
     rootPart.Anchored = true
-    
-    -- Creates the over-the-shoulder shift-lock look smoothly
-    humanoid.CameraOffset = Vector3.new(1.75, 0, 0)
     stopAnimations(humanoid)
 
     if animator then
@@ -264,6 +264,16 @@ local function startFly(character)
             track:Stop(0)
         end)
     end
+
+    cameraTargetPart = Instance.new("Part")
+    cameraTargetPart.Name = "FlyCameraTarget"
+    cameraTargetPart.Transparency = 1
+    cameraTargetPart.Size = Vector3.new(1, 1, 1)
+    cameraTargetPart.CanCollide = false
+    cameraTargetPart.Anchored = true
+    cameraTargetPart.CFrame = rootPart.CFrame
+    cameraTargetPart.Parent = workspace
+    camera.CameraSubject = cameraTargetPart
 
     local lockedPosition = rootPart.Position
 
@@ -303,9 +313,11 @@ local function startFly(character)
             end
         end
 
-        -- Locks character rotation to match camera angle with zero lag or spinning
         local lookPart = camCFrame.LookVector
-        rootPart.CFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookPart.X, lookPart.Y, lookPart.Z))
+        local finalCFrame = CFrame.new(lockedPosition, lockedPosition + Vector3.new(lookPart.X, lookPart.Y, lookPart.Z))
+        
+        rootPart.CFrame = finalCFrame
+        cameraTargetPart.CFrame = finalCFrame
     end)
 end
 
