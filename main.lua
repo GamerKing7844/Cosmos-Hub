@@ -485,17 +485,9 @@ local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local swimLoop = nil
-local speed = 30 
-
-local disabledStates = {
-    Enum.HumanoidStateType.GettingUp,
-    Enum.HumanoidStateType.Running,
-    Enum.HumanoidStateType.RunningNoPhysics,
-    Enum.HumanoidStateType.FallingDown,
-    Enum.HumanoidStateType.Freefall,
-    Enum.HumanoidStateType.Jumping,
-    Enum.HumanoidStateType.Landed
-}
+local speed = 30
+local swimAnimTrack = nil
+local idleAnimTrack = nil
 
 local Toggle = Player:CreateToggle({
    Name = "Swim",
@@ -506,12 +498,12 @@ local Toggle = Player:CreateToggle({
        local humanoid = character and character:FindFirstChild("Humanoid")
        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
 
-       if not humanoid or not rootPart then return end 
+       if not humanoid or not rootPart then return end
+
+       local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
 
        if Value then
-           for _, state in ipairs(disabledStates) do
-               humanoid:SetStateEnabled(state, false)
-           end
+           humanoid.PlatformStand = true
 
            local bv = Instance.new("BodyVelocity")
            bv.Name = "SwimVelocity"
@@ -519,13 +511,36 @@ local Toggle = Player:CreateToggle({
            bv.Velocity = Vector3.zero
            bv.Parent = rootPart
 
-           swimLoop = RunService.Heartbeat:Connect(function()
-               if humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
-                   humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+           local bg = Instance.new("BodyGyro")
+           bg.Name = "SwimGyro"
+           bg.MaxTorque = Vector3.new(100000, 100000, 100000)
+           bg.P = 10000
+           bg.CFrame = rootPart.CFrame
+           bg.Parent = rootPart
+
+           local animate = character:FindFirstChild("Animate")
+           if animate then
+               local swimIdleFolder = animate:FindFirstChild("swimidle")
+               if swimIdleFolder then
+                   local anim = swimIdleFolder:FindFirstChildWhichIsA("Animation")
+                   if anim then
+                       idleAnimTrack = animator:LoadAnimation(anim)
+                       idleAnimTrack:Play()
+                   end
                end
-               
+
+               local swimFolder = animate:FindFirstChild("swim")
+               if swimFolder then
+                   local anim = swimFolder:FindFirstChildWhichIsA("Animation")
+                   if anim then
+                       swimAnimTrack = animator:LoadAnimation(anim)
+                   end
+               end
+           end
+
+           swimLoop = RunService.Heartbeat:Connect(function()
                local moveVector = Vector3.zero
-               
+
                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
                    moveVector = moveVector + camera.CFrame.LookVector
                end
@@ -541,11 +556,30 @@ local Toggle = Player:CreateToggle({
                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
                    moveVector = moveVector + Vector3.new(0, 1, 0)
                end
-               
+
                if moveVector.Magnitude > 0 then
-                   bv.Velocity = moveVector.Unit * speed
+                   moveVector = moveVector.Unit
+                   bv.Velocity = moveVector * speed
+                   bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + moveVector)
+
+                   if swimAnimTrack and not swimAnimTrack.IsPlaying then
+                       swimAnimTrack:Play()
+                   end
+                   if idleAnimTrack and idleAnimTrack.IsPlaying then
+                       idleAnimTrack:Stop()
+                   end
                else
                    bv.Velocity = Vector3.zero
+                   
+                   local lookVector = camera.CFrame.LookVector
+                   bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + Vector3.new(lookVector.X, 0, lookVector.Z))
+
+                   if swimAnimTrack and swimAnimTrack.IsPlaying then
+                       swimAnimTrack:Stop()
+                   end
+                   if idleAnimTrack and not idleAnimTrack.IsPlaying then
+                       idleAnimTrack:Play()
+                   end
                end
            end)
        else
@@ -553,16 +587,24 @@ local Toggle = Player:CreateToggle({
                swimLoop:Disconnect()
                swimLoop = nil
            end
-           
+
            if rootPart:FindFirstChild("SwimVelocity") then
                rootPart.SwimVelocity:Destroy()
            end
-           
-           for _, state in ipairs(disabledStates) do
-               humanoid:SetStateEnabled(state, true)
+           if rootPart:FindFirstChild("SwimGyro") then
+               rootPart.SwimGyro:Destroy()
            end
-           
-           humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+
+           if swimAnimTrack then
+               swimAnimTrack:Stop()
+               swimAnimTrack = nil
+           end
+           if idleAnimTrack then
+               idleAnimTrack:Stop()
+               idleAnimTrack = nil
+           end
+
+           humanoid.PlatformStand = false
        end
    end,
 })
