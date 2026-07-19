@@ -1,3 +1,5 @@
+-- If you have decided to edit Cosmos Hub as it's open source, ensure you change the folder and file name in config saving, or just disable it entirely!
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 Rayfield:LoadConfiguration()
@@ -40,6 +42,23 @@ local Window = Rayfield:CreateWindow({
       Key = {"K3Y_180726"} -- List of keys that the system will accept, can be RAW file links (pastebin, github, etc.) or simple strings ("hello", "key22")
    }
 })
+
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+
+local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+local rayfieldGui = CoreGui:FindFirstChild("Rayfield") or playerGui:FindFirstChild("Rayfield")
+
+if rayfieldGui then
+    local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+    if isMobile then
+        local uiScale = Instance.new("UIScale")
+        uiScale.Scale = 0.75
+        uiScale.Parent = rayfieldGui:FindFirstChild("Main") or rayfieldGui
+    end
+end
 
 local Player = Window:CreateTab("Player", "user-2")
 
