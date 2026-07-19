@@ -487,6 +487,16 @@ local camera = workspace.CurrentCamera
 local swimLoop = nil
 local speed = 30 
 
+local disabledStates = {
+    Enum.HumanoidStateType.GettingUp,
+    Enum.HumanoidStateType.Running,
+    Enum.HumanoidStateType.RunningNoPhysics,
+    Enum.HumanoidStateType.FallingDown,
+    Enum.HumanoidStateType.Freefall,
+    Enum.HumanoidStateType.Jumping,
+    Enum.HumanoidStateType.Landed
+}
+
 local Toggle = Player:CreateToggle({
    Name = "Swim",
    CurrentValue = false,
@@ -499,6 +509,10 @@ local Toggle = Player:CreateToggle({
        if not humanoid or not rootPart then return end 
 
        if Value then
+           for _, state in ipairs(disabledStates) do
+               humanoid:SetStateEnabled(state, false)
+           end
+
            local bv = Instance.new("BodyVelocity")
            bv.Name = "SwimVelocity"
            bv.MaxForce = Vector3.new(100000, 100000, 100000)
@@ -506,7 +520,9 @@ local Toggle = Player:CreateToggle({
            bv.Parent = rootPart
 
            swimLoop = RunService.Heartbeat:Connect(function()
-               humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+               if humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
+                   humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+               end
                
                local moveVector = Vector3.zero
                
@@ -540,6 +556,10 @@ local Toggle = Player:CreateToggle({
            
            if rootPart:FindFirstChild("SwimVelocity") then
                rootPart.SwimVelocity:Destroy()
+           end
+           
+           for _, state in ipairs(disabledStates) do
+               humanoid:SetStateEnabled(state, true)
            end
            
            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
