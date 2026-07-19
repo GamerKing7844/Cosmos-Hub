@@ -4,7 +4,7 @@
 
 ### About the exploit:
 
-Cosmos Hub is a feature packed universal exploit for Roblox that uses Rayfield UI to deliver the best and most seamless user experience possible.
+Cosmos Hub is a feature packed, open source, universal exploit for Roblox that uses Rayfield UI to deliver the best and most seamless user experience possible.
 
 ### How to use:
 
