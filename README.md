@@ -4,7 +4,7 @@
 
 ### About the exploit:
 
-Cosmos Hub is an exploit that uses Rayfield UI (by Sirius) to bring you awesome features like speed adjustment, jump power adjustment, flying, noclipping and more. We use a one-time key system (that can be found below) to ensure user validation for the best experience.
+Cosmos Hub is a feature packed exploit for Roblox that uses Rayfield UI to deliver the best and most seamless user experience possible.
 
 ### How to use:
 
