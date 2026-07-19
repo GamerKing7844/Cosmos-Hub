@@ -18,7 +18,9 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerKing7844/Cosmos-
 
 The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy the key below, and paste it into the exploit:
 
+```
 **K3Y_180726**
+```
 
 ---
 
