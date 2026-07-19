@@ -560,7 +560,7 @@ local Toggle = Player:CreateToggle({
                if moveVector.Magnitude > 0 then
                    moveVector = moveVector.Unit
                    bv.Velocity = moveVector * speed
-                   bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + moveVector)
+                   bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + moveVector) * CFrame.Angles(math.rad(-90), 0, 0)
 
                    if swimAnimTrack and not swimAnimTrack.IsPlaying then
                        swimAnimTrack:Play()
