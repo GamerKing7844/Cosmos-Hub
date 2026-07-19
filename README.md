@@ -18,8 +18,12 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerKing7844/Cosmos-
 
 The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy the key below, and paste it into the exploit:
 
-**TestKey**
+**K3Y_180726**
+
+## THIS IS THE ONLY OFFICIAL COSMOS HUB!!!
+
+Due to Cosmos Hub being open source, anyone can easily copy the code and add anything they want into it, including malicious scripts meaning any other links  that promise new and exciting features are likely fake.
 
 ---
 
-_(PS: If I say "we" alot, I really mean "I" as this is a solo-project. "we" sounds more professional tho so, yeah. Thanks!)_
+_Made by GamerKing7844 with the help of Rayfield UI (by Sirius) and Gemini._
