@@ -130,7 +130,7 @@ local player = game.Players.LocalPlayer
 local Input = Player:CreateInput({
    Name = "Health",
    CurrentValue = "100",
-   PlaceholderText = "50",
+   PlaceholderText = "100",
    RemoveTextAfterFocusLost = false,
    Flag = "Health",
    Callback = function(Text)
@@ -158,7 +158,7 @@ end)
 local Input = Player:CreateInput({
    Name = "Maximum Health",
    CurrentValue = "100",
-   PlaceholderText = "200",
+   PlaceholderText = "100",
    RemoveTextAfterFocusLost = false,
    Flag = "MaxHealth",
    Callback = function(Text)
@@ -251,7 +251,9 @@ end)
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
+
 local flyEnabled = false
+local flySpeed = 50 
 local flyConnection = nil
 local animConnection = nil
 local bv = nil
@@ -335,12 +337,11 @@ local function startFly(character)
         bg.CFrame = CFrame.new(rootPart.Position, rootPart.Position + camCFrame.LookVector)
 
         if moveDirection.Magnitude > 0 then
-            local speed = 50
             local localMove = rootPart.CFrame:VectorToObjectSpace(moveDirection)
             local flightDirection = (camCFrame.LookVector * -localMove.Z) + (camCFrame.RightVector * localMove.X)
             
             if flightDirection.Magnitude > 0 then
-                bv.Velocity = flightDirection.Unit * speed
+                bv.Velocity = flightDirection.Unit * flySpeed
             else
                 bv.Velocity = Vector3.new(0, 0, 0)
             end
@@ -351,17 +352,32 @@ local function startFly(character)
 end
 
 local Toggle = Player:CreateToggle({
-   Name = "Fly",
-   CurrentValue = false,
-   Flag = "Fly",
-   Callback = function(Value)
-       flyEnabled = Value
-       if flyEnabled then
-           if player.Character then startFly(player.Character) end
-       else
-           cleanUpFly()
-       end
-   end,
+    Name = "Fly",
+    CurrentValue = false,
+    Flag = "Fly",
+    Callback = function(Value)
+        flyEnabled = Value
+        if flyEnabled then
+            if player.Character then startFly(player.Character) end
+        else
+            cleanUpFly()
+        end
+    end,
+})
+
+local Input = Player:CreateInput({
+    Name = "Fly Speed",
+    CurrentValue = "50",
+    PlaceholderText = "Enter Speed Here",
+    RemoveTextAfterFocusLost = false,
+    Flag = "FlySpeed",
+    Callback = function(Text)
+        local newSpeed = tonumber(Text) 
+        
+        if newSpeed then
+            flySpeed = newSpeed 
+        end
+    end,
 })
 
 player.CharacterAdded:Connect(function(character)
