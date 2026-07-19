@@ -155,6 +155,29 @@ player.CharacterAdded:Connect(function()
     Input:Set("100")
 end)
 
+local Input = Player:CreateInput({
+   Name = "Maximum Health",
+   CurrentValue = "100",
+   PlaceholderText = "200",
+   RemoveTextAfterFocusLost = false,
+   Flag = "MaxHealth",
+   Callback = function(Text)
+      local LocalPlayer = game.Players.LocalPlayer
+      local Character = LocalPlayer.Character
+      local Humanoid = Character and Character:FindFirstChild("Humanoid")
+
+      if Humanoid then
+         local NewMaxHealth = tonumber(Text)
+         
+         -- Ensure the input is a valid number before applying
+         if NewMaxHealth then
+            Humanoid.MaxHealth = NewMaxHealth
+            Humanoid.Health = NewMaxHealth -- Sets current health to match new max
+         end
+      end
+   end,
+})
+
 local Section = Player:CreateSection("Fun Stuff")
 
 local UserInputService = game:GetService("UserInputService")
