@@ -43,23 +43,6 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-
-local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-local rayfieldGui = CoreGui:FindFirstChild("Rayfield") or playerGui:FindFirstChild("Rayfield")
-
-if rayfieldGui then
-    local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-
-    if isMobile then
-        local uiScale = Instance.new("UIScale")
-        uiScale.Scale = 0.75
-        uiScale.Parent = rayfieldGui:FindFirstChild("Main") or rayfieldGui
-    end
-end
-
 local Player = Window:CreateTab("Player", "user-2")
 
 local Section = Player:CreateSection("Power Adjustment")
@@ -69,7 +52,7 @@ local currentWalkSpeed = 16
 
 local SpeedPower = Player:CreateSlider({
    Name = "Speed Power",
-   Range = {0, 256},
+   Range = {0, 250},
    Increment = 1,
    Suffix = "studs per second",
    CurrentValue = 16,
@@ -93,7 +76,7 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local Button = Player:CreateButton({
-   Name = "Reset Speed",
+   Name = "Reset Speed Power",
    Callback = function()
        if SpeedPower and SpeedPower.Set then
            SpeedPower:Set(16)
@@ -104,7 +87,7 @@ local Button = Player:CreateButton({
 local player = game.Players.LocalPlayer
 local currentJumpPower = 50
 
-local Slider = Player:CreateSlider({
+local JumpPower = Player:CreateSlider({
    Name = "Jump Power",
    Range = {0, 250},
    Increment = 1,
@@ -130,6 +113,15 @@ player.CharacterAdded:Connect(function(character)
         Humanoid.JumpPower = currentJumpPower
     end
 end)
+
+local Button = Player:CreateButton({
+   Name = "Reset Jump Power",
+   Callback = function()
+       if JumpPower and JumpPower.Set then
+           JumpPower:Set(50)
+       end
+   end,
+})
 
 local Section = Player:CreateSection("Health Adjustment")
 
