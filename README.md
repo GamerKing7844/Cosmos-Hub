@@ -24,6 +24,6 @@ The Cosmos Hub uses a one-time key system to ensure user validation. Simply copy
 
 ### THIS IS THE ONLY OFFICIAL COSMOS HUB!!!
 
-Due to Cosmos Hub being open source, anyone can easily copy the code and add anything they want into it, including malicious scripts meaning any other links  that promise new and exciting features are likely fake.
+Due to Cosmos Hub being open source, anyone can easily copy the code and add anything they want into it, including malicious scripts meaning any other links  that promise too good to be true features are likely fake.
 
 _Made by GamerKing7844 with the help of Rayfield UI (by Sirius) and Gemini._
