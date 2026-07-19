@@ -127,7 +127,7 @@ local Section = Player:CreateSection("Health Adjustment")
 
 local player = game.Players.LocalPlayer
 
-local Input = Player:CreateInput({
+local Health = Player:CreateInput({
    Name = "Health",
    CurrentValue = "100",
    PlaceholderText = "100",
@@ -155,7 +155,7 @@ player.CharacterAdded:Connect(function()
     Input:Set("100")
 end)
 
-local Input = Player:CreateInput({
+local MaxHealth = Player:CreateInput({
    Name = "Maximum Health",
    CurrentValue = "100",
    PlaceholderText = "100",
@@ -175,6 +175,18 @@ local Input = Player:CreateInput({
             Humanoid.Health = NewMaxHealth -- Sets current health to match new max
          end
       end
+   end,
+})
+
+local Button = Player:CreateButton({
+   Name = "Reset Health",
+   Callback = function()
+       if Health and Health.Set then
+           Health:Set(100)
+       end,
+       if MaxHealth and MaxHealth.Set then
+           MaxHealth:Set(100)
+       end
    end,
 })
 
@@ -368,7 +380,7 @@ local Toggle = Player:CreateToggle({
 local Input = Player:CreateInput({
     Name = "Fly Speed",
     CurrentValue = "50",
-    PlaceholderText = "Enter Speed Here",
+    PlaceholderText = "50",
     RemoveTextAfterFocusLost = false,
     Flag = "FlySpeed",
     Callback = function(Text)
