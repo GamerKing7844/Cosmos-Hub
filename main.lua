@@ -477,6 +477,37 @@ player.CharacterAdded:Connect(function(character)
     if noclipEnabled then startNoclip(character) end
 end)
 
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local swimLoop = nil 
+
+local Toggle = Player:CreateToggle({
+   Name = "Swim",
+   CurrentValue = false,
+   Flag = "Swim",
+   Callback = function(Value)
+       local character = localPlayer.Character
+       local humanoid = character and character:FindFirstChild("Humanoid")
+
+       if not humanoid then return end 
+
+       if Value then
+           swimLoop = RunService.Heartbeat:Connect(function()
+               humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+           end)
+       else
+           if swimLoop then
+               swimLoop:Disconnect()
+               swimLoop = nil
+           end
+           
+           humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+       end
+   end,
+})
+
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
