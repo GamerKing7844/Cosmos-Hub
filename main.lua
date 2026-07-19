@@ -478,10 +478,14 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
 
-local swimLoop = nil 
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local swimLoop = nil
+local speed = 30 
 
 local Toggle = Player:CreateToggle({
    Name = "Swim",
@@ -490,17 +494,52 @@ local Toggle = Player:CreateToggle({
    Callback = function(Value)
        local character = localPlayer.Character
        local humanoid = character and character:FindFirstChild("Humanoid")
+       local rootPart = character and character:FindFirstChild("HumanoidRootPart")
 
-       if not humanoid then return end 
+       if not humanoid or not rootPart then return end 
 
        if Value then
+           local bv = Instance.new("BodyVelocity")
+           bv.Name = "SwimVelocity"
+           bv.MaxForce = Vector3.new(100000, 100000, 100000)
+           bv.Velocity = Vector3.zero
+           bv.Parent = rootPart
+
            swimLoop = RunService.Heartbeat:Connect(function()
                humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+               
+               local moveVector = Vector3.zero
+               
+               if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                   moveVector = moveVector + camera.CFrame.LookVector
+               end
+               if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                   moveVector = moveVector - camera.CFrame.LookVector
+               end
+               if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                   moveVector = moveVector - camera.CFrame.RightVector
+               end
+               if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                   moveVector = moveVector + camera.CFrame.RightVector
+               end
+               if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                   moveVector = moveVector + Vector3.new(0, 1, 0)
+               end
+               
+               if moveVector.Magnitude > 0 then
+                   bv.Velocity = moveVector.Unit * speed
+               else
+                   bv.Velocity = Vector3.zero
+               end
            end)
        else
            if swimLoop then
                swimLoop:Disconnect()
                swimLoop = nil
+           end
+           
+           if rootPart:FindFirstChild("SwimVelocity") then
+               rootPart.SwimVelocity:Destroy()
            end
            
            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
