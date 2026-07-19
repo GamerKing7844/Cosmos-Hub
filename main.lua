@@ -183,7 +183,8 @@ local Button = Player:CreateButton({
    Callback = function()
        if Health and Health.Set then
            Health:Set(100)
-       end,
+       end
+       
        if MaxHealth and MaxHealth.Set then
            MaxHealth:Set(100)
        end
